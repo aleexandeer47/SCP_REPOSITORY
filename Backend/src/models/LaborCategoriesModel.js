@@ -7,16 +7,23 @@ const laborCategoriesSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      minlength: 2,
       maxlength: 200,
     },
     unidad: {
       type: String,
       required: true,
       trim: true,
+      minlength: 2,
       maxlength: 15,
     },
     precio: {
       type: Number,
+      required: true,
+    },
+    codigo_e: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company",
       required: true,
     },
   },

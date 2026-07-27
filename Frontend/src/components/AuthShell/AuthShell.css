@@ -1,0 +1,322 @@
+.login-screen {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 24px;
+}
+
+.login-backdrop {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+
+.login-backdrop-panel {
+  flex: 1 1 50%;
+}
+
+.login-backdrop-panel--light {
+  background: linear-gradient(135deg, var(--brand-400), var(--brand-500));
+  clip-path: polygon(0 0, 100% 0, 62% 100%, 0 100%);
+}
+
+.login-backdrop-panel--dark {
+  margin-left: -18%;
+  background: linear-gradient(135deg, var(--brand-800), var(--brand-950));
+  clip-path: polygon(38% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  /* Solid (not translucent/blurred) on purpose: a backdrop-filter here would
+     sample the diagonal seam behind it and show as a visible line through
+     the card. A flat fill sidesteps that entirely. */
+  background: var(--brand-900);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  padding: 40px 36px 36px;
+  box-shadow: var(--shadow-lg);
+}
+
+.login-card--wide {
+  max-width: 520px;
+}
+
+.login-brand {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.login-brand-mark {
+  display: inline-block;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--text-on-brand);
+}
+
+.login-brand-tagline {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-on-brand-muted);
+  letter-spacing: 0.3px;
+}
+
+/* ─── Shared auth-page content: headings, forms, fields ───────────────── */
+
+.auth-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text-on-brand);
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.auth-desc {
+  font-size: 13px;
+  color: var(--text-on-brand-muted);
+  text-align: center;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.auth-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 480px) {
+  .auth-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.auth-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-on-brand);
+}
+
+.auth-field-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  border: 1.5px solid transparent;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth-field-control:focus-within {
+  border-color: var(--brand-400);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.auth-field-control--error {
+  border-color: var(--danger);
+}
+
+.auth-field-icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+}
+
+.auth-field-control input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 12px 0;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.auth-field-toggle {
+  flex: none;
+  display: inline-flex;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.auth-field-toggle:hover {
+  color: var(--text-secondary);
+}
+
+.auth-field-toggle:focus-visible {
+  outline: 2px solid var(--brand-400);
+  outline-offset: 2px;
+}
+
+.auth-field-error {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffb4b4;
+}
+
+.auth-alert {
+  margin: -6px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffd7d7;
+  background: rgba(201, 75, 75, 0.35);
+  border: 1px solid rgba(255, 215, 215, 0.4);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+}
+
+.auth-alert-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+.auth-row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.auth-remember {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-on-brand-muted);
+  cursor: pointer;
+}
+
+.auth-remember input {
+  accent-color: var(--accent);
+}
+
+.auth-link {
+  color: var(--text-on-brand);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.auth-submit {
+  margin-top: 6px;
+  width: 100%;
+  padding: 13px 20px;
+  font-size: 15px;
+}
+
+.auth-switch {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-on-brand-muted);
+}
+
+.auth-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-on-brand);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-back-link:hover {
+  text-decoration: underline;
+}
+
+.auth-back-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Success / confirmation state (password reset requested, etc.) */
+
+.auth-success {
+  text-align: center;
+}
+
+.auth-success-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--accent-bg);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+}
+
+.auth-success-icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+/* Password strength meter */
+
+.auth-strength {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.auth-strength-track {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+}
+
+.auth-strength-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.2s ease, background 0.2s ease;
+}
+
+.auth-strength-label {
+  flex: none;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+@media (max-width: 520px) {
+  .login-card {
+    padding: 32px 24px 28px;
+  }
+}

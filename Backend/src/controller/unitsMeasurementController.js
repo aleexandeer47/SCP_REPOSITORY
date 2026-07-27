@@ -2,12 +2,12 @@ import UnitsMeasurement from "../models/UnitsMeasurementModel.js";
 import { catchAsync } from "../utils/catchAsync.js";
 
 export const getUnitsMeasurement = catchAsync(async (req, res) => {
-  const units = await UnitsMeasurement.find().populate("codigo_e");
+  const units = await UnitsMeasurement.find({ codigo_e: req.user.codigo_e }).populate("codigo_e");
   res.json(units);
 });
 
 export const getUnitMeasurement = catchAsync(async (req, res) => {
-  const unit = await UnitsMeasurement.findById(req.params.id).populate("codigo_e");
+  const unit = await UnitsMeasurement.findOne({ _id: req.params.id, codigo_e: req.user.codigo_e }).populate("codigo_e");
   if (!unit) {
     return res.status(404).json({ message: "Unidad de medida no encontrada" });
   }
@@ -15,18 +15,18 @@ export const getUnitMeasurement = catchAsync(async (req, res) => {
 });
 
 export const createUnitMeasurement = catchAsync(async (req, res) => {
-  const { nombre, abreviatura, codigo_e } = req.body;
-  const newUnit = new UnitsMeasurement({ nombre, abreviatura, codigo_e });
+  const { nombre, abreviatura } = req.body;
+  const newUnit = new UnitsMeasurement({ nombre, abreviatura, codigo_e: req.user.codigo_e });
   const unitSaved = await newUnit.save();
   res.status(201).json(unitSaved);
 });
 
 export const updateUnitMeasurement = catchAsync(async (req, res) => {
-  const { nombre, abreviatura, codigo_e } = req.body;
-  const updatedUnit = await UnitsMeasurement.findByIdAndUpdate(
-    req.params.id,
-    { nombre, abreviatura, codigo_e },
-    { new: true }
+  const { nombre, abreviatura } = req.body;
+  const updatedUnit = await UnitsMeasurement.findOneAndUpdate(
+    { _id: req.params.id, codigo_e: req.user.codigo_e },
+    { nombre, abreviatura },
+    { new: true, runValidators: true }
   );
   if (!updatedUnit) {
     return res.status(404).json({ message: "Unidad de medida no encontrada" });
@@ -35,7 +35,7 @@ export const updateUnitMeasurement = catchAsync(async (req, res) => {
 });
 
 export const deleteUnitMeasurement = catchAsync(async (req, res) => {
-  const deletedUnit = await UnitsMeasurement.findByIdAndDelete(req.params.id);
+  const deletedUnit = await UnitsMeasurement.findOneAndDelete({ _id: req.params.id, codigo_e: req.user.codigo_e });
   if (!deletedUnit) {
     return res.status(404).json({ message: "Unidad de medida no encontrada" });
   }

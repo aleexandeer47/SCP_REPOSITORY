@@ -6,6 +6,7 @@ import HTMLRecoveryEmail from "../utils/SendMailRecoveryPasswords.js";
 import { config } from "../config.js";
 import Admin from "../models/AdminModel.js";
 import { checkRequired, checkEmail, checkLength, getFirstError } from "../utils/Validator.js";
+import { respondWithError } from "../utils/describeMongooseError.js";
 
 // Este controlador gestiona el restablecimiento de contraseñas olvidadas para los usuarios de SCP.
 // Envía un código aleatorio por correo, verifica que coincida usando una cookie cifrada temporal,
@@ -71,8 +72,7 @@ recoveryPasswordController.requestCode = async (req, res) => {
       return res.status(200).json({ message: "email sent" });
     });
   } catch (error) {
-    console.log("error " + error);
-    return res.status(500).json({ message: "Internal server error" });
+    return respondWithError(res, error);
   }
 };
 
@@ -110,8 +110,7 @@ recoveryPasswordController.verifyCode = async (req, res) => {
 
     return res.status(200).json({ message: "Code verified successfully" });
   } catch (error) {
-    console.log("error " + error);
-    return res.status(500).json({ message: "Internal server error" });
+    return respondWithError(res, error);
   }
 };
 
@@ -156,8 +155,7 @@ recoveryPasswordController.newPassword = async (req, res) => {
 
     return res.status(200).json({ message: "Password updated" });
   } catch (error) {
-    console.log("error " + error);
-    return res.status(500).json({ message: "Internal server error" });
+    return respondWithError(res, error);
   }
 };
 

@@ -1,0 +1,59 @@
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dashboard-banner {
+  background: linear-gradient(120deg, var(--brand-900), var(--brand-700));
+  border-radius: var(--radius-md);
+  padding: 22px 26px;
+  color: var(--text-on-brand);
+}
+
+.dashboard-banner h1 {
+  font-size: 21px;
+  font-weight: 700;
+  /* The global h1 rule sets color directly on the element, which always
+     beats an inherited value regardless of selector specificity — so the
+     light color has to be declared here, not just on the parent. */
+  color: var(--text-on-brand);
+}
+
+.dashboard-banner-company {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--text-on-brand-muted);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+.dashboard-grid-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.dashboard-stats {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 960px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .dashboard-stats {
+    flex-direction: column;
+  }
+}

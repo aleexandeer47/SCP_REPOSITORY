@@ -15,13 +15,8 @@ router.use(authRequired);
 
 router.get("/", getMaterialCategories);
 router.get("/:id", validateObjectId("id"), getMaterialCategory);
-router.post("/", validateFields(["descripcion", "codigo_e"]), createMaterialCategory);
-router.put(
-  "/:id",
-  validateObjectId("id"),
-  validateFields(["descripcion", "codigo_e"]),
-  updateMaterialCategory
-);
+router.post("/", validateFields(["descripcion"]), createMaterialCategory);
+router.put("/:id", validateObjectId("id"), validateFields(["descripcion"]), updateMaterialCategory);
 router.delete("/:id", validateObjectId("id"), deleteMaterialCategory);
 
 export default router;

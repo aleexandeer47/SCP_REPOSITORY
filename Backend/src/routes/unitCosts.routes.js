@@ -13,18 +13,10 @@ const router = Router();
 
 router.use(authRequired);
 
-const requiredFields = [
-  "cantidad_material",
-  "calculo_precioU",
-  "total",
-  "codigo_m",
-  "codigo_p",
-  "codigo_ci",
-  "codigo_e",
-  "codigo_pu",
-  "codigo_proyecto",
-  "codigo_cat",
-];
+// codigo_m / codigo_cat / codigo_pu are conditionally required depending on
+// `categoria` (equipo & material need codigo_m, mano_obra needs codigo_cat) —
+// enforced in the controller since validateFields can't express that.
+const requiredFields = ["categoria", "codigo_p", "unidad", "cantidad", "tarifa"];
 
 router.get("/", getUnitCosts);
 router.get("/:id", validateObjectId("id"), getUnitCost);

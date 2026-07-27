@@ -3,6 +3,7 @@ import jsonwebtoken from "jsonwebtoken";
 import Admin from "../models/AdminModel.js";
 import { config } from "../config.js";
 import { checkRequired, getFirstError } from "../utils/Validator.js";
+import { respondWithError } from "../utils/describeMongooseError.js";
 
 // Este controlador maneja la autenticación y validación de sesiones de los usuarios de SCP.
 // Se encarga de verificar credenciales, gestionar el bloqueo de cuentas tras múltiples intentos fallidos,
@@ -62,7 +63,7 @@ loginController.login = async (req, res) => {
     const userType = userFound.isAdmin ? "admin" : "user";
 
     const token = jsonwebtoken.sign(
-      { id: userFound._id, userType },
+      { id: userFound._id, userType, codigo_e: userFound.codigo_e },
       config.JWT.secret,
       { expiresIn: "1d" }
     );
@@ -75,8 +76,7 @@ loginController.login = async (req, res) => {
 
     return res.status(200).json({ message: "Login exitoso", userType });
   } catch (error) {
-    console.log("error " + error);
-    return res.status(500).json({ message: "Internal server error" });
+    return respondWithError(res, error);
   }
 };
 

@@ -14,7 +14,7 @@ router.get("/:id", validateObjectId("id"), adminController.getUser);
 router.post(
   "/",
   upload.single("image_url"),
-  validateFields(["usuario", "contrasena", "email", "codigo_e"]),
+  validateFields(["usuario", "contrasena", "email"]),
   adminController.register
 );
 router.put("/:id", validateObjectId("id"), upload.single("image_url"), adminController.updateUser);

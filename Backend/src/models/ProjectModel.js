@@ -7,18 +7,26 @@ const projectSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      minlength: 2,
       maxlength: 100,
     },
     direccion: {
       type: String,
       required: true,
       trim: true,
+      minlength: 2,
       maxlength: 150,
     },
     cliente: {
       type: String,
       trim: true,
+      minlength: 2,
       maxlength: 100,
+    },
+    codigo_e: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company",
+      required: true,
     },
   },
   {

@@ -15,13 +15,8 @@ router.use(authRequired);
 
 router.get("/", getUnitsMeasurement);
 router.get("/:id", validateObjectId("id"), getUnitMeasurement);
-router.post("/", validateFields(["nombre", "codigo_e"]), createUnitMeasurement);
-router.put(
-  "/:id",
-  validateObjectId("id"),
-  validateFields(["nombre", "codigo_e"]),
-  updateUnitMeasurement
-);
+router.post("/", validateFields(["nombre"]), createUnitMeasurement);
+router.put("/:id", validateObjectId("id"), validateFields(["nombre"]), updateUnitMeasurement);
 router.delete("/:id", validateObjectId("id"), deleteUnitMeasurement);
 
 export default router;

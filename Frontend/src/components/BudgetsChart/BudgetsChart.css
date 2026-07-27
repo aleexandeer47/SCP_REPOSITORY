@@ -1,0 +1,121 @@
+.budgets-chart {
+  padding: 22px;
+}
+
+.budgets-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.budgets-chart-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.budgets-chart-empty {
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 40px 0;
+  text-align: center;
+}
+
+.budgets-chart-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.budgets-chart-range {
+  border: 1px solid var(--border-strong);
+  background: var(--surface-sunken);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.budgets-chart-range:hover {
+  background: var(--brand-100);
+}
+
+.budgets-chart-plot {
+  position: relative;
+}
+
+.budgets-chart-plot svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+.budgets-chart-gridline {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.budgets-chart-baseline {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.budgets-chart-axis-label {
+  font-size: 9px;
+  fill: var(--text-muted);
+}
+
+.budgets-chart-bar {
+  fill: var(--brand-500);
+  transition: fill 0.15s ease;
+  cursor: pointer;
+}
+
+.budgets-chart-bar--active {
+  fill: var(--brand-700);
+}
+
+.budgets-chart-trend {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.9;
+}
+
+.budgets-chart-dot {
+  fill: var(--accent);
+  stroke: var(--surface);
+  stroke-width: 2;
+  cursor: pointer;
+}
+
+.budgets-chart-tooltip {
+  position: absolute;
+  transform: translate(-50%, -125%);
+  background: var(--brand-950);
+  color: var(--text-on-brand);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.budgets-chart-tooltip-label {
+  font-size: 10px;
+  color: var(--text-on-brand-muted);
+}
+
+.budgets-chart-tooltip-value {
+  font-size: 13px;
+  font-weight: 700;
+}

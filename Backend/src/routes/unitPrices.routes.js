@@ -13,7 +13,7 @@ const router = Router();
 
 router.use(authRequired);
 
-const requiredFields = ["precio", "presentacion", "precio_unitario", "codigo_m", "codigo_u", "codigo_e"];
+const requiredFields = ["precio", "presentacion", "precio_unitario", "codigo_m", "codigo_u"];
 
 router.get("/", getUnitPrices);
 router.get("/:id", validateObjectId("id"), getUnitPrice);

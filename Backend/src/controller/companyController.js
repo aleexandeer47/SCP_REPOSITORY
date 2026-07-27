@@ -1,43 +1,39 @@
 import Company from "../models/CompanyModel.js";
 import { catchAsync } from "../utils/catchAsync.js";
+import { checkRequired, checkLength, checkNit, getFirstError } from "../utils/Validator.js";
 
-export const getCompanies = catchAsync(async (req, res) => {
-  const companies = await Company.find();
-  res.json(companies);
-});
-
-export const getCompany = catchAsync(async (req, res) => {
-  const company = await Company.findById(req.params.id);
+// Cada empresa solo puede ver y editar su propia información, nunca la de
+// otra — por eso estos endpoints ignoran cualquier id que venga en la URL o
+// el body y siempre usan req.user.codigo_e, derivado del JWT del admin
+// autenticado. No existe endpoint para listar todas las empresas ni para
+// crear/eliminar una: una empresa nueva solo se crea vía /api/registro.
+export const getMyCompany = catchAsync(async (req, res) => {
+  const company = await Company.findById(req.user.codigo_e);
   if (!company) {
     return res.status(404).json({ message: "Empresa no encontrada" });
   }
   res.json(company);
 });
 
-export const createCompany = catchAsync(async (req, res) => {
+export const updateMyCompany = catchAsync(async (req, res) => {
   const { nombre, nit } = req.body;
-  const newCompany = new Company({ nombre, nit });
-  const companySaved = await newCompany.save();
-  res.status(201).json(companySaved);
-});
 
-export const updateCompany = catchAsync(async (req, res) => {
-  const { nombre, nit } = req.body;
+  const validationError = getFirstError([
+    checkRequired(nombre, "nombre de la empresa"),
+    checkLength(nombre, "nombre de la empresa", 2, 70),
+    checkNit(nit),
+  ]);
+  if (validationError) {
+    return res.status(400).json({ message: validationError });
+  }
+
   const updatedCompany = await Company.findByIdAndUpdate(
-    req.params.id,
-    { nombre, nit },
-    { new: true }
+    req.user.codigo_e,
+    { nombre: nombre.trim(), nit: nit.trim() },
+    { new: true, runValidators: true }
   );
   if (!updatedCompany) {
     return res.status(404).json({ message: "Empresa no encontrada" });
   }
   res.json(updatedCompany);
-});
-
-export const deleteCompany = catchAsync(async (req, res) => {
-  const deletedCompany = await Company.findByIdAndDelete(req.params.id);
-  if (!deletedCompany) {
-    return res.status(404).json({ message: "Empresa no encontrada" });
-  }
-  res.status(204).end();
 });

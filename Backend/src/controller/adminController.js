@@ -6,28 +6,30 @@ import {
   checkLength,
   checkEmail,
   checkObjectId,
+  checkEmailDomain,
   getFirstError,
 } from "../utils/Validator.js";
+import { respondWithError } from "../utils/describeMongooseError.js";
 
 // Este controlador se encarga de todo el ciclo de vida (CRUD) de las cuentas de usuario de SCP.
 // Permite listarlas, ver detalles individuales, registrar nuevas cuentas, actualizarlas y eliminarlas,
 // controlando las validaciones de campos, la encriptación de contraseñas y la subida de fotos de perfil.
+// Todo queda restringido a la empresa (codigo_e) del admin autenticado — nunca se confía en un
+// codigo_e que venga en el body, para que un admin de una empresa no pueda listar/crear/editar
+// usuarios de otra.
 const adminController = {};
 
-// Obtener todos los usuarios
-// Trae la lista completa de usuarios registrados, sin sus contraseñas y con la empresa asociada poblada.
+// Obtener todos los usuarios de la misma empresa que el admin autenticado
 adminController.getUsers = async (req, res) => {
   try {
-    const users = await Admin.find().select("-contrasena").populate("codigo_e");
+    const users = await Admin.find({ codigo_e: req.user.codigo_e }).select("-contrasena").populate("codigo_e");
     return res.status(200).json(users);
   } catch (error) {
-    console.log("error " + error);
-    return res.status(500).json({ message: "Internal server error" });
+    return respondWithError(res, error);
   }
 };
 
-// Obtener usuario por ID
-// Busca los datos de un usuario en específico usando su ID, validando primero el formato del ID.
+// Obtener usuario por ID (solo si pertenece a la misma empresa)
 adminController.getUser = async (req, res) => {
   try {
     const idError = checkObjectId(req.params.id, "ID");
@@ -35,24 +37,25 @@ adminController.getUser = async (req, res) => {
       return res.status(400).json({ message: idError });
     }
 
-    const user = await Admin.findById(req.params.id).select("-contrasena").populate("codigo_e");
+    const user = await Admin.findOne({ _id: req.params.id, codigo_e: req.user.codigo_e })
+      .select("-contrasena")
+      .populate("codigo_e");
     if (!user) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
     return res.status(200).json(user);
   } catch (error) {
-    console.log("error " + error);
-    return res.status(500).json({ message: "Internal server error" });
+    return respondWithError(res, error);
   }
 };
 
-// Registrar usuario
-// Crea una nueva cuenta en el sistema. Solo puede ejecutarlo un administrador ya autenticado.
-// Valida los campos obligatorios, verifica que el usuario y el correo no estén repetidos,
-// encripta la contraseña y sube la foto de perfil (si viene una en la petición) a Cloudinary.
+// Registrar usuario dentro de la propia empresa del admin autenticado.
+// SCP no tiene roles: todo usuario que se crea es administrador de su
+// empresa, así que isAdmin nunca se lee del body — siempre queda en true.
 adminController.register = async (req, res) => {
   try {
-    let { usuario, contrasena, email, isAdmin, codigo_e } = req.body;
+    let { usuario, contrasena, email } = req.body;
+    const codigo_e = req.user.codigo_e;
 
     const validationError = getFirstError([
       checkRequired(usuario, "usuario"),
@@ -60,7 +63,6 @@ adminController.register = async (req, res) => {
       checkRequired(contrasena, "contraseña"),
       checkLength(contrasena, "contraseña", 6, 50),
       checkEmail(email, "correo electrónico"),
-      checkObjectId(codigo_e, "empresa"),
     ]);
 
     if (validationError) {
@@ -69,6 +71,11 @@ adminController.register = async (req, res) => {
 
     usuario = usuario?.trim();
     email = email?.trim()?.toLowerCase();
+
+    const emailDomainError = await checkEmailDomain(email);
+    if (emailDomainError) {
+      return res.status(400).json({ message: emailDomainError });
+    }
 
     const existUser = await Admin.findOne({ $or: [{ usuario }, { email }] });
     if (existUser) {
@@ -81,7 +88,7 @@ adminController.register = async (req, res) => {
       usuario,
       contrasena: passwordHash,
       email,
-      isAdmin: isAdmin ?? false,
+      isAdmin: true,
       codigo_e,
       image_url: req.file ? req.file.path : null,
       public_id: req.file ? req.file.filename : null,
@@ -96,15 +103,11 @@ adminController.register = async (req, res) => {
       codigo_e: userSaved.codigo_e,
     });
   } catch (error) {
-    console.log("error " + error);
-    return res.status(500).json({ message: "Internal server error" });
+    return respondWithError(res, error);
   }
 };
 
-// Actualizar usuario
-// Permite modificar los datos de un usuario existente. Verifica que el usuario/correo no esté ocupado
-// por otra cuenta, encripta la contraseña si se envía una nueva y, si se sube una nueva imagen,
-// actualiza la referencia y borra la anterior de Cloudinary.
+// Actualizar usuario (solo si pertenece a la misma empresa que el admin autenticado)
 adminController.updateUser = async (req, res) => {
   try {
     const idError = checkObjectId(req.params.id, "ID");
@@ -112,7 +115,7 @@ adminController.updateUser = async (req, res) => {
       return res.status(400).json({ message: idError });
     }
 
-    let { usuario, contrasena, email, isAdmin, codigo_e } = req.body;
+    let { usuario, contrasena, email } = req.body;
 
     const validationError = getFirstError([
       checkLength(usuario, "usuario", 3, 70),
@@ -124,7 +127,14 @@ adminController.updateUser = async (req, res) => {
       return res.status(400).json({ message: validationError });
     }
 
-    const userFound = await Admin.findById(req.params.id);
+    if (email) {
+      const emailDomainError = await checkEmailDomain(email);
+      if (emailDomainError) {
+        return res.status(400).json({ message: emailDomainError });
+      }
+    }
+
+    const userFound = await Admin.findOne({ _id: req.params.id, codigo_e: req.user.codigo_e });
     if (!userFound) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
@@ -145,8 +155,6 @@ adminController.updateUser = async (req, res) => {
     const updateData = {
       usuario: usuario || userFound.usuario,
       email: email || userFound.email,
-      isAdmin,
-      codigo_e,
     };
 
     if (contrasena) {
@@ -172,13 +180,11 @@ adminController.updateUser = async (req, res) => {
 
     return res.status(200).json(updatedUser);
   } catch (error) {
-    console.log("error " + error);
-    return res.status(500).json({ message: "Internal server error" });
+    return respondWithError(res, error);
   }
 };
 
-// Eliminar usuario
-// Borra de forma permanente una cuenta de usuario de la base de datos, junto con su foto de perfil en Cloudinary si tiene una.
+// Eliminar usuario (solo si pertenece a la misma empresa que el admin autenticado)
 adminController.deleteUser = async (req, res) => {
   try {
     const idError = checkObjectId(req.params.id, "ID");
@@ -186,9 +192,16 @@ adminController.deleteUser = async (req, res) => {
       return res.status(400).json({ message: idError });
     }
 
-    const userFound = await Admin.findById(req.params.id);
+    const userFound = await Admin.findOne({ _id: req.params.id, codigo_e: req.user.codigo_e });
     if (!userFound) {
       return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    // Toda empresa debe tener siempre al menos un usuario para poder
+    // iniciar sesión — nunca puede quedar huérfana.
+    const userCount = await Admin.countDocuments({ codigo_e: req.user.codigo_e });
+    if (userCount <= 1) {
+      return res.status(400).json({ message: "No puedes eliminar al último usuario de la empresa. Toda empresa debe tener al menos un usuario." });
     }
 
     if (userFound.public_id) {
@@ -198,8 +211,7 @@ adminController.deleteUser = async (req, res) => {
     await Admin.findByIdAndDelete(req.params.id);
     return res.status(204).end();
   } catch (error) {
-    console.log("error " + error);
-    return res.status(500).json({ message: "Internal server error" });
+    return respondWithError(res, error);
   }
 };
 

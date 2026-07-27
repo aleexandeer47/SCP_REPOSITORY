@@ -1,0 +1,113 @@
+/* Shared light-background form field styles, used inside modals across the
+   CRUD pages (Modal renders on a white surface, unlike the dark AuthShell
+   forms which use their own auth-field-* classes). */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 480px) {
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.field-control,
+.field select,
+.field input,
+.field textarea {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 14px;
+  color: var(--text-primary);
+  padding: 10px 12px;
+  font-family: inherit;
+  width: 100%;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--brand-400);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.field-control--error,
+.field input.has-error,
+.field select.has-error {
+  border-color: var(--danger) !important;
+}
+
+.field-error {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.field-hint {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.field-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.field-suffix {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  padding: 0 12px;
+}
+
+.field-suffix input {
+  border: none;
+  padding: 10px 0;
+  flex: 1;
+}
+
+.field-suffix input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.field-suffix:focus-within {
+  border-color: var(--brand-400);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.field-suffix-label {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  flex: none;
+}
+
+.field-suffix--readonly {
+  background: var(--surface-sunken);
+}
+
+.field-suffix--readonly input {
+  color: var(--text-secondary);
+}

@@ -7,6 +7,7 @@ const partidasSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      minlength: 2,
       maxlength: 100,
     },
     unidad_medida: {
@@ -17,6 +18,22 @@ const partidasSchema = new mongoose.Schema(
     },
     cantidad_analizada: {
       type: Number,
+    },
+    // "Datos generales" for the Desglose de Costo Unitario report — optional,
+    // filled in from the Costos Unitarios screen rather than the Partida form.
+    codigo_proyecto: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Project",
+    },
+    produccion_xdia: {
+      type: Number,
+    },
+    prestaciones_pct: {
+      type: Number,
+    },
+    fecha: {
+      type: String,
+      trim: true,
     },
     codigo_e: {
       type: mongoose.Schema.Types.ObjectId,

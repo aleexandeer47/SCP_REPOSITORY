@@ -15,15 +15,11 @@ router.use(authRequired);
 
 router.get("/", getPartidas);
 router.get("/:id", validateObjectId("id"), getPartida);
-router.post(
-  "/",
-  validateFields(["nombre_actividad", "unidad_medida", "codigo_e"]),
-  createPartida
-);
+router.post("/", validateFields(["nombre_actividad", "unidad_medida"]), createPartida);
 router.put(
   "/:id",
   validateObjectId("id"),
-  validateFields(["nombre_actividad", "unidad_medida", "codigo_e"]),
+  validateFields(["nombre_actividad", "unidad_medida"]),
   updatePartida
 );
 router.delete("/:id", validateObjectId("id"), deletePartida);

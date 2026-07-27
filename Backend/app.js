@@ -7,6 +7,7 @@ import loginRoutes from "./src/routes/login.routes.js";
 import logoutRoutes from "./src/routes/logout.routes.js";
 import recoveryPasswordRoutes from "./src/routes/recoveryPassword.routes.js";
 import adminRoutes from "./src/routes/admin.routes.js";
+import publicRegisterRoutes from "./src/routes/publicRegister.routes.js";
 import companyRoutes from "./src/routes/company.routes.js";
 import unitsMeasurementRoutes from "./src/routes/unitsMeasurement.routes.js";
 import materialCategoriesRoutes from "./src/routes/materialCategories.routes.js";
@@ -19,6 +20,7 @@ import laborCategoriesRoutes from "./src/routes/laborCategories.routes.js";
 import unitCostsRoutes from "./src/routes/unitCosts.routes.js";
 import templatesRoutes from "./src/routes/templates.routes.js";
 import budgetsRoutes from "./src/routes/budgets.routes.js";
+import { describeMongooseError } from "./src/utils/describeMongooseError.js";
 
 const app = express();
 
@@ -44,6 +46,7 @@ app.use("/api/loginAdmin", loginRoutes);
 app.use("/api/logout", logoutRoutes);
 app.use("/api/recoveryPasswordAdmin", recoveryPasswordRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/registro", publicRegisterRoutes);
 app.use("/api/empresas", companyRoutes);
 app.use("/api/unidades-medida", unitsMeasurementRoutes);
 app.use("/api/categorias-materiales", materialCategoriesRoutes);
@@ -62,9 +65,17 @@ app.use((req, res) => {
   res.status(404).json({ message: "Ruta no encontrada" });
 });
 
-// Manejador de errores centralizado
+// Manejador de errores centralizado. describeMongooseError traduce los
+// errores crudos de Mongoose (en inglés, sin contexto de negocio) — sin
+// esto, cualquier dato inválido (texto demasiado largo, valor repetido, ID
+// mal formado) caía aquí y el frontend solo mostraba "Error interno del
+// servidor" sin decir qué pasó realmente.
 app.use((error, req, res, next) => {
   console.error(error);
+  const known = describeMongooseError(error);
+  if (known) {
+    return res.status(known.status).json({ message: known.message });
+  }
   res.status(error.status || 500).json({ message: error.message || "Error interno del servidor" });
 });
 

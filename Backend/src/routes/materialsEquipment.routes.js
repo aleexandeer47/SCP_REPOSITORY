@@ -15,15 +15,11 @@ router.use(authRequired);
 
 router.get("/", getMaterialsEquipment);
 router.get("/:id", validateObjectId("id"), getMaterialEquipment);
-router.post(
-  "/",
-  validateFields(["descripcion", "codigo_cm", "codigo_e"]),
-  createMaterialEquipment
-);
+router.post("/", validateFields(["descripcion", "codigo_cm"]), createMaterialEquipment);
 router.put(
   "/:id",
   validateObjectId("id"),
-  validateFields(["descripcion", "codigo_cm", "codigo_e"]),
+  validateFields(["descripcion", "codigo_cm"]),
   updateMaterialEquipment
 );
 router.delete("/:id", validateObjectId("id"), deleteMaterialEquipment);

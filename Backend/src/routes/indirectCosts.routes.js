@@ -15,13 +15,8 @@ router.use(authRequired);
 
 router.get("/", getIndirectCosts);
 router.get("/:id", validateObjectId("id"), getIndirectCost);
-router.post("/", validateFields(["precio", "codigo_m", "codigo_e"]), createIndirectCost);
-router.put(
-  "/:id",
-  validateObjectId("id"),
-  validateFields(["precio", "codigo_m", "codigo_e"]),
-  updateIndirectCost
-);
+router.post("/", validateFields(["precio", "codigo_m"]), createIndirectCost);
+router.put("/:id", validateObjectId("id"), validateFields(["precio", "codigo_m"]), updateIndirectCost);
 router.delete("/:id", validateObjectId("id"), deleteIndirectCost);
 
 export default router;

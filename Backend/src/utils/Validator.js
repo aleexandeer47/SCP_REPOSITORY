@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import dns from "node:dns/promises";
 
 /*
   Este archivo es nuestra caja de herramientas para validar datos.
@@ -45,6 +46,20 @@ export const checkEmail = (value, fieldName = "correo electrónico") => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(value)) {
     return `El formato del ${fieldName} no es válido.`;
+  }
+  return null;
+};
+
+/**
+ * Valida el formato del NIT de El Salvador: NNNN-NNNNNN-NNN-N.
+ */
+export const checkNit = (value, fieldName = "NIT") => {
+  const reqErr = checkRequired(value, fieldName);
+  if (reqErr) return reqErr;
+
+  const nitRegex = /^\d{4}-\d{6}-\d{3}-\d$/;
+  if (!nitRegex.test(String(value).trim())) {
+    return `El formato del ${fieldName} no es válido. Usa el formato 0000-000000-000-0.`;
   }
   return null;
 };
@@ -124,6 +139,33 @@ export const checkDate = (value, fieldName, { allowFuture = true, allowPast = tr
     }
   }
   return null;
+};
+
+/**
+ * Verifica que el dominio del correo exista de verdad y pueda recibir
+ * correo (consulta sus registros MX), para atrapar dominios inventados
+ * como "correo@asdasd.com". Es async, así que va aparte de getFirstError.
+ *
+ * Si la consulta DNS falla por un problema ajeno al dominio (timeout, sin
+ * red, etc.) no bloqueamos el registro — solo rechazamos cuando el propio
+ * DNS confirma que el dominio no existe.
+ */
+export const checkEmailDomain = async (value, fieldName = "correo electrónico") => {
+  const domain = String(value || "").split("@")[1];
+  if (!domain) return `El formato del ${fieldName} no es válido.`;
+
+  try {
+    const records = await dns.resolveMx(domain);
+    if (!records || records.length === 0) {
+      return `El dominio del ${fieldName} no puede recibir correos.`;
+    }
+    return null;
+  } catch (error) {
+    if (error.code === "ENOTFOUND" || error.code === "ENODATA") {
+      return `El dominio del ${fieldName} no existe.`;
+    }
+    return null;
+  }
 };
 
 /**
