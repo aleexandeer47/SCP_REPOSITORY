@@ -24,11 +24,18 @@ import { describeMongooseError } from "./src/utils/describeMongooseError.js";
 
 const app = express();
 
+// El frontend en producción llega a este backend vía el rewrite de
+// Vercel (Frontend/vercel.json) — desde el navegador es same-origin, pero
+// la petición que Vercel reenvía sí trae el header Origin del dominio real,
+// así que igual necesita estar en la lista blanca.
+const PROD_ORIGIN = "https://scp-repository.vercel.app";
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Permitir peticiones sin origen (como Postman o curl) o cualquier localhost en desarrollo
-      if (!origin || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+      // Permitir peticiones sin origen (como Postman o curl), cualquier localhost en
+      // desarrollo, o el dominio de producción en Vercel.
+      if (!origin || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) || origin === PROD_ORIGIN) {
         return callback(null, true);
       }
       return callback(new Error("No permitido por la política CORS de KAPRA"));
