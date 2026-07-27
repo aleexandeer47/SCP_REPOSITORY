@@ -1,4 +1,3 @@
-
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -7,7 +6,6 @@ import loginRoutes from "./src/routes/login.routes.js";
 import logoutRoutes from "./src/routes/logout.routes.js";
 import recoveryPasswordRoutes from "./src/routes/recoveryPassword.routes.js";
 import adminRoutes from "./src/routes/admin.routes.js";
-import publicRegisterRoutes from "./src/routes/publicRegister.routes.js";
 import companyRoutes from "./src/routes/company.routes.js";
 import unitsMeasurementRoutes from "./src/routes/unitsMeasurement.routes.js";
 import materialCategoriesRoutes from "./src/routes/materialCategories.routes.js";
@@ -20,24 +18,33 @@ import laborCategoriesRoutes from "./src/routes/laborCategories.routes.js";
 import unitCostsRoutes from "./src/routes/unitCosts.routes.js";
 import templatesRoutes from "./src/routes/templates.routes.js";
 import budgetsRoutes from "./src/routes/budgets.routes.js";
-import { describeMongooseError } from "./src/utils/describeMongooseError.js";
 
 const app = express();
 
-// El frontend en producción llega a este backend vía el rewrite de
-// Vercel (Frontend/vercel.json) — desde el navegador es same-origin, pero
-// la petición que Vercel reenvía sí trae el header Origin del dominio real,
-// así que igual necesita estar en la lista blanca.
-const PROD_ORIGIN = "https://scp-repository.vercel.app";
+const allowedOrigins = [
+  "https://scp-repository-3l3u.vercel.app",
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Permitir peticiones sin origen (como Postman o curl), cualquier localhost en
-      // desarrollo, o el dominio de producción en Vercel.
-      if (!origin || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) || origin === PROD_ORIGIN) {
+      // Permitir peticiones sin origen (como Postman o curl)
+      if (!origin) return callback(null, true);
+
+      // Localhost en desarrollo
+      if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
         return callback(null, true);
       }
+
+      // Frontend en producción (Vercel) y sus despliegues de preview
+      if (
+        allowedOrigins.includes(origin) ||
+        /^https:\/\/scp-repository-3l3u-[\w-]+\.vercel\.app$/.test(origin)
+      ) {
+        return callback(null, true);
+      }
+
       return callback(new Error("No permitido por la política CORS de KAPRA"));
     },
     credentials: true,
@@ -53,7 +60,6 @@ app.use("/api/loginAdmin", loginRoutes);
 app.use("/api/logout", logoutRoutes);
 app.use("/api/recoveryPasswordAdmin", recoveryPasswordRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/registro", publicRegisterRoutes);
 app.use("/api/empresas", companyRoutes);
 app.use("/api/unidades-medida", unitsMeasurementRoutes);
 app.use("/api/categorias-materiales", materialCategoriesRoutes);
@@ -72,19 +78,10 @@ app.use((req, res) => {
   res.status(404).json({ message: "Ruta no encontrada" });
 });
 
-// Manejador de errores centralizado. describeMongooseError traduce los
-// errores crudos de Mongoose (en inglés, sin contexto de negocio) — sin
-// esto, cualquier dato inválido (texto demasiado largo, valor repetido, ID
-// mal formado) caía aquí y el frontend solo mostraba "Error interno del
-// servidor" sin decir qué pasó realmente.
+// Manejador de errores centralizado
 app.use((error, req, res, next) => {
   console.error(error);
-  const known = describeMongooseError(error);
-  if (known) {
-    return res.status(known.status).json({ message: known.message });
-  }
   res.status(error.status || 500).json({ message: error.message || "Error interno del servidor" });
 });
 
 export default app;
-
