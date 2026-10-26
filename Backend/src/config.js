@@ -13,10 +13,12 @@ export const config = {
     JWT: {
         secret: process.env.JWT_secret_key,
     },
-    // Credenciales para envío de correos electrónicos
-    email: {
-        user_email: process.env.USER_EMAIL,
-        user_password: process.env.USER_PASSWORD
+    // Credenciales de Mailjet para envío de correos electrónicos
+    mailjet: {
+        api_key: process.env.MAILJET_API_KEY,
+        secret_key: process.env.MAILJET_SECRET_KEY,
+        sender_email: process.env.MAILJET_SENDER_EMAIL,
+        sender_name: process.env.MAILJET_SENDER_NAME || "SCP"
     },
     // Configuración del servicio de almacenamiento Cloudinary
     cloudinary: {

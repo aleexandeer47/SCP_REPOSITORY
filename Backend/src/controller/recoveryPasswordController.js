@@ -1,7 +1,7 @@
 import jsonwebtoken from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import nodemailer from "nodemailer";
+import { sendMail } from "../utils/mailjet.js";
 import HTMLRecoveryEmail from "../utils/SendMailRecoveryPasswords.js";
 import { config } from "../config.js";
 import Admin from "../models/AdminModel.js";
@@ -16,7 +16,7 @@ const recoveryPasswordController = {};
 // Solicitar código de recuperación de contraseña
 // Busca la cuenta del usuario por su correo electrónico. Si la encuentra, genera un código hexadecimal
 // de 6 dígitos, firma un token temporal (con 15 min de vigencia), lo inyecta en una cookie segura
-// y le envía el código al correo del usuario usando nodemailer.
+// y le envía el código al correo del usuario usando Mailjet.
 recoveryPasswordController.requestCode = async (req, res) => {
   try {
     const { email } = req.body;
@@ -46,31 +46,21 @@ recoveryPasswordController.requestCode = async (req, res) => {
       { expiresIn: "15m" }
     );
 
+    // Enviar el código al correo del usuario usando Mailjet
+    try {
+      await sendMail({
+        to: emailTrimmed,
+        subject: "Código de recuperación de contraseña",
+        html: HTMLRecoveryEmail(randomCode),
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ message: "Error al enviar correo" });
+    }
+
     res.cookie("recoveryCookie", token, { maxAge: 15 * 60 * 1000 });
 
-    // Configurar el transporte de correo usando Gmail
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: config.email.user_email,
-        pass: config.email.user_password,
-      },
-    });
-
-    const mailOptions = {
-      from: config.email.user_email,
-      to: emailTrimmed,
-      subject: "Código de recuperación de contraseña",
-      html: HTMLRecoveryEmail(randomCode),
-    };
-
-    transporter.sendMail(mailOptions, (error) => {
-      if (error) {
-        console.log(error);
-        return res.status(500).json({ message: "Error al enviar correo" });
-      }
-      return res.status(200).json({ message: "email sent" });
-    });
+    return res.status(200).json({ message: "email sent" });
   } catch (error) {
     return respondWithError(res, error);
   }
